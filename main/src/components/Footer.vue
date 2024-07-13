@@ -21,13 +21,11 @@
   </script>
   
   <style scoped>
-  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
   
   .site-footer {
     background: linear-gradient(to right, #4300a2, #ff5858);
     color: white;
     padding: 20px 0;
-    font-family: 'Montserrat', sans-serif; /* Fonte personalizada */
   }
   
   .container {

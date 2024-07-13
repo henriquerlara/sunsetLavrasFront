@@ -32,7 +32,6 @@
 
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import axios from 'axios';
 
 interface User {
@@ -43,9 +42,6 @@ interface User {
 
 export default defineComponent({
   name: 'Header',
-  components: {
-    FontAwesomeIcon,
-  },
   setup() {
     const isMenuOpen = ref(false);
     const user = ref<User | null>(null);
@@ -79,20 +75,12 @@ export default defineComponent({
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
-
-html, body {
-  width: 100%;
-  height: 100%;
-  font-family: 'Montserrat', sans-serif; /* Fonte personalizada */
-}
 
 .sunset-header {
   width: 100%;
   background: linear-gradient(to right, #4300a2, #ff5858);
   color: white;
   padding: 40px;
-  font-family: 'Montserrat', sans-serif; /* Fonte personalizada */
   margin: 0;
 }
 
@@ -112,11 +100,11 @@ html, body {
 
 .logo h1 {
   margin: 0;
-  font-size: 2.5rem; /* Tamanho da fonte */
-  font-weight: 700; /* Peso da fonte */
-  letter-spacing: 2px; /* Espaçamento entre letras */
-  text-transform: uppercase; /* Letras maiúsculas */
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3); /* Sombra do texto mais sutil */
+  font-size: 2.5rem; 
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase; 
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .navigation {
@@ -137,10 +125,9 @@ html, body {
   font-size: 1rem;
   padding: 0.5rem 1rem;
   transition: background-color 0.3s, color 0.3s;
-  font-family: 'Montserrat', sans-serif; /* Fonte personalizada */
-  font-weight: 700; /* Peso da fonte */
-  letter-spacing: 1px; /* Espaçamento entre letras */
-  text-transform: uppercase; /* Letras maiúsculas */
+  font-weight: 700; 
+  letter-spacing: 1px; 
+  text-transform: uppercase; 
 }
 
 .menu-item a:hover {
@@ -162,10 +149,9 @@ html, body {
   font-size: 1rem;
   transition: background-color 0.3s, color 0.3s;
   padding: 0.5rem 1rem;
-  font-family: 'Montserrat', sans-serif; /* Fonte personalizada */
-  font-weight: 700; /* Peso da fonte */
-  letter-spacing: 1px; /* Espaçamento entre letras */
-  text-transform: uppercase; /* Letras maiúsculas */
+  font-weight: 700; 
+  letter-spacing: 1px; 
+  text-transform: uppercase; 
 }
 
 .login-link:hover {

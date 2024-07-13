@@ -19,14 +19,12 @@ export default defineComponent({
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
 
 .home-banner {
   position: relative;
   width: 100%;
   height: 80vh;
   background: url('@/assets/quadras.jpg') no-repeat center center/cover;
-  font-family: 'Montserrat', sans-serif; /* Fonte personalizada */
 }
 
 .overlay {
@@ -75,7 +73,6 @@ button {
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
-  font-family: 'Montserrat', sans-serif; /* Fonte personalizada */
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;

@@ -88,13 +88,6 @@
   </script>
   
   <style scoped>
-  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
-  
-  html, body {
-    width: 100%;
-    height: 100%;
-    font-family: 'Montserrat', sans-serif;
-  }
   
   .account {
     display: flex;
@@ -105,7 +98,6 @@
     background: linear-gradient(to right, #4300a2, #ff5858);
     color: white;
     padding: 40px 20px;
-    font-family: 'Montserrat', sans-serif;
     position: relative; /* Add this to position the home link */
   }
   

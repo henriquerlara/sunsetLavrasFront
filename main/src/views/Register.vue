@@ -62,7 +62,6 @@
   </script>
   
   <style scoped>
-  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
   
   .register-container {
     display: flex;
@@ -70,7 +69,6 @@
     align-items: center;
     height: 100vh;
     background-color: #f8f8f8;
-    font-family: 'Montserrat', sans-serif;
   }
   
   .register-box {

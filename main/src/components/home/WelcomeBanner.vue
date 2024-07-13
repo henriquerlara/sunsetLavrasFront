@@ -20,14 +20,12 @@ export default defineComponent({
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
 
 .Welcome-banner {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 2rem;
-  font-family: 'Montserrat', sans-serif;
   background-color: #f8f8f8; /* Cor de fundo leve */
 }
 
@@ -61,7 +59,6 @@ button {
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
-  font-family: 'Montserrat', sans-serif;
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;

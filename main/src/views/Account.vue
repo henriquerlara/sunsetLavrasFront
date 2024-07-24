@@ -9,9 +9,9 @@
         </div>
         <div v-if="user">
           <div class="user-info">
-            <p><strong>Nome:</strong> <input v-model="user.name" /></p>
+            <p><strong>Nome:</strong> <input v-model="user.nome" /></p>
             <p><strong>Email:</strong> <input v-model="user.email" /></p>
-            <p><strong>Senha:</strong> <input v-model="user.password" /></p>
+            <p><strong>Senha:</strong> <input v-model="user.senha" /></p>
           </div>
           <div class="button-group">
             <button @click="updateUser" class="update-button">Atualizar</button>
@@ -31,9 +31,9 @@
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
   
   interface User {
-    name: string;
+    nome: string;
     email: string;
-    password: string;
+    senha: string;
   }
   
   export default defineComponent({

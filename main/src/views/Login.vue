@@ -8,8 +8,8 @@
           <input type="email" id="email" v-model="email" required />
         </div>
         <div class="form-group">
-          <label for="password">Senha</label>
-          <input type="password" id="password" v-model="password" required />
+          <label for="senha">Senha</label>
+          <input type="password" id="senha" v-model="senha" required />
         </div>
         <button type="submit">Entrar</button>
       </form>
@@ -27,7 +27,7 @@ export default defineComponent({
   data() {
     return {
       email: '',
-      password: ''
+      senha: ''
     };
   },
   methods: {
@@ -35,7 +35,7 @@ export default defineComponent({
       try {
         const response = await axios.post('http://localhost:3000/api/login', {
           email: this.email,
-          password: this.password
+          senha: this.senha
         }, { withCredentials: true }); // Importante: enviar cookies com as credenciais
         alert('Login realizado com sucesso!');
         this.$router.push('/');  // Redireciona para a página inicial
@@ -55,21 +55,21 @@ export default defineComponent({
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #f8f8f8;
+  background: linear-gradient(to right, #4300a2, #ff5858);
 }
 
 .login-box {
   background: white;
-  padding: 2rem;
+  padding: 60px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   text-align: center;
-  width: 300px;
+  width: 400px;
 }
 
 h1 {
-  margin-bottom: 1rem;
-  font-size: 24px;
+  margin-bottom: 1.5rem;
+  font-size: 28px;
   color: #f857a6;
 }
 
@@ -86,9 +86,10 @@ label {
 
 input {
   width: 100%;
-  padding: 0.5rem;
+  padding: 0.75rem;
   border: 1px solid #ccc;
   border-radius: 5px;
+  font-size: 1rem;
 }
 
 button {

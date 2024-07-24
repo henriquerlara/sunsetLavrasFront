@@ -5,7 +5,7 @@
         <h1>Sunset Lavras</h1>
       </div>
       <nav :class="['navigation', { open: isMenuOpen }]">
-        <div class="menu-item"><a href="#">Página inicial</a></div>
+        <div class="menu-item"><a href="/">Página inicial</a></div>
         <div class="menu-item"><a href="#">Sobre</a></div>
         <div class="menu-item"><a href="#">Serviços</a></div>
         <div class="menu-item"><a href="#">Agendamento online</a></div>
@@ -14,7 +14,7 @@
       <div class="login" v-if="user">
         <a href="/account" class="login-link">
           <font-awesome-icon :icon="['fas', 'user-circle']" class="login-icon" />
-          <span>{{ user.name }}</span>
+          <span>{{ user.nome }}</span>
         </a>
       </div>
       <div class="login" v-else>
@@ -31,13 +31,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue';
 import axios from 'axios';
+import { defineComponent, onMounted, ref } from 'vue';
 
 interface User {
-  name: string;
+  nome: string;
   email: string;
-  password: string;
 }
 
 export default defineComponent({

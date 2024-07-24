@@ -4,7 +4,7 @@
       <div class="content">
         <h1>Seja Bem Vindo!</h1>
         <p>Conheça a Sunset Arena Lavras, muito mais que um complexo de quadras de esportes de areia! Venha nos visitar!</p>
-        <button>Agendar</button>
+        <button @click="goToCalendar">Agendar</button>
       </div>
     </div>
   </div>
@@ -12,14 +12,25 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { useRouter } from 'vue-router';
 
 export default defineComponent({
-  name: 'HomeBanner'
+  name: 'HomeBanner',
+  setup() {
+    const router = useRouter();
+    
+    const goToCalendar = () => {
+      router.push({ name: 'Planos' });
+    };
+
+    return {
+      goToCalendar
+    };
+  }
 });
 </script>
 
 <style scoped>
-
 .home-banner {
   position: relative;
   width: 100%;

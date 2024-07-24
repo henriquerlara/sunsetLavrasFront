@@ -2,9 +2,13 @@ import { createStore } from 'vuex';
 
 export default createStore({
   state: {
-    message: 'Hello Vuex'
+    selectedDates: [] as Date[], // Estado para armazenar as datas selecionadas
   },
-  mutations: {},
+  mutations: {
+    setSelectedDates(state, dates: Date[]) {
+      state.selectedDates = dates;
+    },
+  },
   actions: {},
   modules: {}
 });

@@ -1,14 +1,12 @@
 <template>
-    <div class="planos-banner">
-      <div class="image">
-        <img src="@/assets/quadras.jpg" alt="Planos Sunset Arena Lavras" />
-      </div>
+    <div class="Welcome-banner">
       <div class="content">
-        <h1>ESCOLHA SEU PLANO</h1>
-        <p>Conheça os diferentes planos que oferecemos para aluguel de quadras e aulas de esportes de praia. Temos opções que se encaixam perfeitamente no seu estilo de vida. Confira e escolha o melhor para você!</p>
-        <router-link to="/planos">
-          <button>VER PLANOS</button>
-        </router-link>
+        <h1>CONHEÇA NOSSAS QUADRAS</h1>
+        <p>Localizado no centro de Lavras, Minas Gerais, a Sunset Arena conta com 5 quadras de areia para esportes de praia. Agende uma aula ou garanta seu aluguel online e prepare-se para a diversão!</p>
+        <button>CONHECER</button>
+      </div>
+      <div class="image">
+        <img src="@/assets/quadras.jpg" alt="Sunset Arena Lavras" />
       </div>
     </div>
   </template>
@@ -17,28 +15,28 @@
   import { defineComponent } from 'vue';
   
   export default defineComponent({
-    name: 'PlanosBanner'
+    name: 'QuadrasBanner'
   });
   </script>
   
   <style scoped>
   
-  .planos-banner {
+  .Welcome-banner {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 2rem;
-    background: linear-gradient(to right, #4300a2, #ff5858);
+    background-color: #f8f8f8; /* Cor de fundo leve */
   }
   
   .content {
     flex: 1;
-    padding-left: 2rem;
+    padding-right: 2rem;
   }
   
   h1 {
     font-size: 36px;
-    color: #ffffff;
+    color: #f857a6;
     margin-bottom: 1rem;
     font-weight: 700;
     letter-spacing: 1px;
@@ -47,7 +45,7 @@
   
   p {
     font-size: 18px;
-    color: #ffffff;
+    color: #333;
     margin-bottom: 2rem;
     font-weight: 400;
   }

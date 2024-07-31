@@ -12,7 +12,7 @@
           <div class="plan" @click="selectPlan('mensal')">
             <h2>Mensal</h2>
             <p>Acesso ilimitado por um mês.</p>
-            <router-link :to="{ name: 'Calendar' }" class="button">Agendar</router-link>
+            <router-link :to="{ name: 'SelectDayPage' }" class="button">Agendar</router-link>
           </div>
           <div class="plan" @click="selectPlan('trimestral')">
             <h2>Trimestral</h2>
@@ -26,7 +26,7 @@
   
   <script lang="ts">
   import { defineComponent } from 'vue';
-  import HomeIcon from '@/components/HomeIcon.vue'
+  import HomeIcon from '../components/HomeIcon.vue'
   
   export default defineComponent({
     name: 'PlansPage',
@@ -47,13 +47,6 @@
   </script>
   
   <style scoped>
-  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
-  
-  html, body {
-    width: 100%;
-    height: 100%;
-    font-family: 'Montserrat', sans-serif;
-  }
   
   .plans-page {
     display: flex;
@@ -112,7 +105,7 @@
   .button {
     display: inline-block;
     padding: 10px 20px;
-    background: linear-gradient(to right, #ff5858, #f857a6);
+    background: linear-gradient(to right, #4300a2, #ff5858);
     color: white;
     text-decoration: none;
     border-radius: 5px;
@@ -121,7 +114,7 @@
   }
   
   .button:hover {
-    background: linear-gradient(to right, #f857a6, #ff5858);
+    background:  linear-gradient(to left, #4300a2, #ff5858);
   }
   </style>
   

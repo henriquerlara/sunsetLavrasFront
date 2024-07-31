@@ -11,7 +11,7 @@
   
   <script lang="ts">
   import { defineComponent } from 'vue';
-  import Header from '@/components/Header.vue';
+  import Header from '../components/Header.vue';
   import HomeBanner from '../components/home/HomeBanner.vue';
   import WelcomeBanner from '../components/home/WelcomeBanner.vue';
   import Footer from '../components/Footer.vue';

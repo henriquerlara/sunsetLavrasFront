@@ -3,11 +3,17 @@ import Home from '../views/Home.vue';
 import Login from '../views/Login.vue';
 import Register from '../views/Register.vue';
 import Account from '../views/Account.vue';
-import CalendarPage from '../views/CalendarPage.vue';
-import SelectTimePage from '../views/SelectTimePage.vue'
+import CalendarPage from '../views/avulso/CalendarPage.vue';
+import SelectTimePage from '../views/avulso/SelectTimePage.vue';
 import PlansPage from '@/views/PlansPage.vue';
 import PaymentPage from '@/views/PaymentPage.vue';
 import CancelPage from '../views/CancelPage.vue';
+import PlanosDescricaoPage from '@/views/PlanosDescricaoPage.vue';
+import store from '../store'; // Importe o Vuex store
+import axios from 'axios';
+import SelectDayPage from '@/views/SelectDayPage.vue';
+import SelectTimeMensalPage from '@/views/SelectTimeMensalPage.vue';
+import SuccessPage from '@/views/SuccessPage.vue';
 
 const routes = [
   {
@@ -24,6 +30,7 @@ const routes = [
     path: '/account',
     name: 'Account',
     component: Account,
+    meta: { requiresAuth: true }
   },
   {
     path: '/register',
@@ -33,12 +40,14 @@ const routes = [
   {
     path: '/calendar',
     name: 'Calendar',
-    component: CalendarPage
+    component: CalendarPage,
+    meta: { requiresAuth: true }
   },
   {
     path: '/select-time',
     name: 'SelectTime',
     component: SelectTimePage,
+    meta: { requiresAuth: true }
   },
   {
     path: '/planos',
@@ -49,12 +58,33 @@ const routes = [
     path: '/pagamento',
     name: 'Pagamento',
     component: PaymentPage,
+    meta: { requiresAuth: true }
   },
   {
     path: '/cancel',
     name: 'Cancel',
     component: CancelPage,
   },
+  {
+    path: '/planosView',
+    name: 'PlanosDescricaoPage',
+    component: PlanosDescricaoPage,
+  },
+  {
+    path: '/dias',
+    name: 'SelectDayPage',
+    component: SelectDayPage,
+  },
+  {
+    path: '/select-time-mensal',
+    name: 'SelectTimeMensal',
+    component: SelectTimeMensalPage,
+  },
+  {
+    path: '/success',
+    name: 'SuccessPage',
+    component: SuccessPage,
+  }
 ];
 
 const router = createRouter({
@@ -64,12 +94,22 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      next({ name: 'login' });
-    } else {
-      next();
-    }
+    axios.get('http://localhost:3000/account', { withCredentials: true })
+      .then(response => {
+        if (response.data.isAuthenticated) {
+          store.commit('setAuthentication', true);
+          next();
+        } else {
+          store.commit('setAuthentication', false);
+          alert('Faça login primeiro.');
+          next({ name: 'login' });
+        }
+      })
+      .catch(() => {
+        store.commit('setAuthentication', false);
+        alert('Faça login primeiro.');
+        next({ name: 'login' });
+      });
   } else {
     next();
   }

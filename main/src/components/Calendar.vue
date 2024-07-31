@@ -5,13 +5,14 @@
       is-expanded
       :attributes="attrs"
       :min-date="today"
+      :max-date="maxDate"
       @dayclick="onDayClick"
     />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, computed } from 'vue';
 import dayjs from 'dayjs';
 import { useStore } from 'vuex';
 
@@ -20,16 +21,19 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const today = dayjs().startOf('day').toDate();
+    const maxDate = dayjs().add(6, 'day').endOf('day').toDate(); // Adiciona 7 dias a partir de hoje
 
-    const attrs = ref([
+    const selectedDate = computed(() => store.state.selectedDate);
+
+    const attrs = computed(() => [
       {
         key: 'today',
         dot: 'red',
         dates: new Date(),
       },
       {
-        key: 'selectedDates',
-        dates: store.state.selectedDates,
+        key: 'selectedDate',
+        dates: selectedDate.value,
         highlight: true,
       },
     ]);
@@ -37,27 +41,23 @@ export default defineComponent({
     const onDayClick = (day: any) => {
       const date = dayjs(day.date).startOf('day');
 
-      if (date.isBefore(today)) {
-        alert('Não é possível selecionar um dia anterior ao de hoje.');
+      if (date.isBefore(today) || date.isAfter(maxDate)) {
+        alert('A data selecionada está fora do intervalo permitido.');
         return;
       }
 
-      const selectedDates = store.state.selectedDates as Date[];
-      const index = selectedDates.findIndex((d: Date) => dayjs(d).isSame(date, 'day'));
-
-      if (index === -1) {
-        selectedDates.push(date.toDate()); // Selecionar a data
+      if (selectedDate.value && dayjs(selectedDate.value).isSame(date, 'day')) {
+        store.commit('setSelectedDate', null); // Deselecionar a data
       } else {
-        selectedDates.splice(index, 1); // Deselecionar a data
+        store.commit('setSelectedDate', date.toDate()); // Selecionar a data
       }
-
-      store.commit('setSelectedDates', selectedDates); // Atualizar o estado no Vuex
     };
 
     return {
       attrs,
       onDayClick,
       today,
+      maxDate,
     };
   },
 });

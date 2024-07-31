@@ -3,7 +3,7 @@
       <div class="container">
         <div class="contact-info">
           <a href="mailto:arenasunsetlavras@gmail.com">arenasunsetlavras@gmail.com</a>
-          <a href="https://instagram.com/arenasunsetlavras" target="_blank" rel="noopener noreferrer">Instagram</a>
+          <a href="https://www.instagram.com/sunsetarenalavras/" target="_blank" rel="noopener noreferrer">Instagram</a>
         </div>
         <div class="copyright">
           ©2024 por Sunset Arena Lavras.

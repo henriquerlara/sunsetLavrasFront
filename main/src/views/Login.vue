@@ -19,37 +19,48 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
 import axios from 'axios';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
 export default defineComponent({
   name: 'Login',
-  data() {
-    return {
-      email: '',
-      senha: ''
-    };
-  },
-  methods: {
-    async handleLogin() {
+  setup() {
+    const store = useStore();
+    const router = useRouter();
+    const email = ref<string | null>(null);
+    const senha = ref<string | null>(null);
+
+    const handleLogin = async () => {
       try {
-        const response = await axios.post('http://localhost:3000/api/login', {
-          email: this.email,
-          senha: this.senha
-        }, { withCredentials: true }); // Importante: enviar cookies com as credenciais
-        alert('Login realizado com sucesso!');
-        this.$router.push('/');  // Redireciona para a página inicial
+        const response = await axios.post('http://localhost:3000/login', {
+          email: email.value,
+          senha: senha.value
+        }, { withCredentials: true });
+
+        if (response.data.success) {
+          store.commit('setAuthentication', true);
+          router.push('/'); // Use o router aqui
+        } else {
+          alert('Login falhou. Por favor, verifique suas credenciais.');
+        }
       } catch (error) {
-        console.error('Erro ao realizar login:');
+        console.error('Erro ao realizar login:', error);
         alert('Erro ao realizar login. Por favor, tente novamente.');
       }
-    }
+    };
+
+    return {
+      handleLogin,
+      email,
+      senha,
+    };
   }
 });
 </script>
 
 <style scoped>
-
 .login-container {
   display: flex;
   justify-content: center;

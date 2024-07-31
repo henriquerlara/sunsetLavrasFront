@@ -5,8 +5,8 @@
       </div>
       <div class="content">
         <h1>ESCOLHA SEU PLANO</h1>
-        <p>Conheça os diferentes planos que oferecemos para aluguel de quadras e aulas de esportes de praia. Temos opções que se encaixam perfeitamente no seu estilo de vida. Confira e escolha o melhor para você!</p>
-        <router-link to="/planos">
+        <p>Conheça os diferentes planos que oferecemos para aluguel de quadras. Temos opções que se encaixam perfeitamente no seu estilo de vida. Confira e escolha o melhor para você!</p>
+        <router-link to="/planosView">
           <button>VER PLANOS</button>
         </router-link>
       </div>
@@ -53,21 +53,17 @@
   }
   
   button {
-    background-color: #f857a6;
-    color: white;
+    background-color: white;
+    color: #f857a6;
     border: none;
     padding: 16px 32px;
     font-size: 16px;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s;
-    font-weight: 700;
+    font-weight: bold;
     letter-spacing: 1px;
     text-transform: uppercase;
-  }
-  
-  button:hover {
-    background-color: #ff5858;
   }
   
   .image {

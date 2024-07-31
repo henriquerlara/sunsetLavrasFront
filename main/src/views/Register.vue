@@ -5,23 +5,28 @@
       <form @submit.prevent="registerUser">
         <div class="form-group">
           <label for="name">Nome</label>
-          <input type="text" id="name" v-model="name" required pattern="[A-Za-z\s]{2,}" title="O nome deve ter pelo menos 2 caracteres e conter apenas letras." />
+          <input type="text" id="name" v-model="state.name" @blur="validateField('name')" />
+          <span v-if="state.errors.name" class="error">{{ state.errors.name }}</span>
         </div>
         <div class="form-group">
           <label for="email">Email</label>
-          <input type="email" id="email" v-model="email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" title="Por favor, insira um email válido." />
+          <input type="email" id="email" v-model="state.email" @blur="validateField('email')" />
+          <span v-if="state.errors.email" class="error">{{ state.errors.email }}</span>
         </div>
         <div class="form-group">
-          <label for="password">Senha</label>
-          <input type="password" id="password" v-model="password" required minlength="8" title="A senha deve ter pelo menos 8 caracteres." />
+          <label for="senha">Senha</label>
+          <input type="password" id="senha" v-model="state.senha" @blur="validateField('senha')" />
+          <span v-if="state.errors.senha" class="error">{{ state.errors.senha }}</span>
         </div>
         <div class="form-group">
           <label for="cpf">CPF</label>
-          <input type="text" id="cpf" v-model="cpf" required pattern="\d{3}\.\d{3}\.\d{3}-\d{2}" title="O CPF deve estar no formato XXX.XXX.XXX-XX" />
+          <input type="text" id="cpf" v-model="state.cpf" @input="applyCpfMask" @blur="validateField('cpf')" />
+          <span v-if="state.errors.cpf" class="error">{{ state.errors.cpf }}</span>
         </div>
         <div class="form-group">
-          <label for="phone">Telefone</label>
-          <input type="tel" id="phone" v-model="phone" required pattern="\(\d{2}\) \d{4,5}-\d{4}" title="O telefone deve estar no formato (XX) XXXXX-XXXX." />
+          <label for="telefone">Telefone</label>
+          <input type="tel" id="telefone" v-model="state.telefone" @input="applyPhoneMask" @blur="validateField('telefone')" />
+          <span v-if="state.errors.telefone" class="error">{{ state.errors.telefone }}</span>
         </div>
         <button type="submit">Cadastrar</button>
       </form>
@@ -31,48 +36,130 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, reactive } from 'vue';
 import axios from 'axios';
+import * as yup from 'yup';
+import { useRouter } from 'vue-router';
 
 export default defineComponent({
   name: 'Register',
-  data() {
-    return {
+  setup() {
+    const router = useRouter();
+
+    const state = reactive({
       name: '',
       email: '',
-      password: '',
+      senha: '',
       cpf: '',
-      phone: '',
+      telefone: '',
+      errors: {
+        name: '',
+        email: '',
+        senha: '',
+        cpf: '',
+        telefone: '',
+      } as Record<string, string>
+    });
+
+    const schema = yup.object().shape({
+      name: yup.string().min(2, 'O nome deve ter pelo menos 2 caracteres').required('Nome é obrigatório'),
+      email: yup.string().email('Email inválido').required('Email é obrigatório'),
+      senha: yup.string().min(8, 'A senha deve ter pelo menos 8 caracteres').required('Senha é obrigatória'),
+      cpf: yup.string().matches(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, 'O CPF deve estar no formato XXX.XXX.XXX-XX').required('CPF é obrigatório'),
+      telefone: yup.string().matches(/^\(\d{2}\) \d{4,5}-\d{4}$/, 'O telefone deve estar no formato (XX) XXXXX-XXXX').required('Telefone é obrigatório'),
+    });
+
+    const validateField = async (field: string) => {
+      try {
+        await schema.validateAt(field, state);
+        state.errors[field] = '';
+      } catch (err) {
+        if (err instanceof yup.ValidationError) {
+          state.errors[field] = err.message;
+        }
+      }
     };
-  },
-  methods: {
-    async registerUser() {
+
+    const validate = async () => {
+      try {
+        await schema.validate({ ...state }, { abortEarly: false });
+        state.errors = { name: '', email: '', senha: '', cpf: '', telefone: '' };
+        return true;
+      } catch (err) {
+        if (err instanceof yup.ValidationError) {
+          const newErrors: Record<string, string> = { name: '', email: '', senha: '', cpf: '', telefone: '' };
+          err.inner.forEach((error) => {
+            if (error.path) {
+              newErrors[error.path] = error.message;
+            }
+          });
+          state.errors = newErrors;
+        }
+        return false;
+      }
+    };
+
+    const registerUser = async () => {
+      if (!(await validate())) {
+        return;
+      }
+      
       try {
         console.log('Registrando usuário com os dados:', {
-          name: this.name,
-          email: this.email,
-          password: this.password,
-          cpf: this.cpf,
-          phone: this.phone,
+          nome: state.name,
+          email: state.email,
+          senha: state.senha,
+          cpf: state.cpf,
+          telefone: state.telefone,
         });
 
-        const response = await axios.post('http://localhost:3000/api/users', {
-          name: this.name,
-          email: this.email,
-          password: this.password,
-          cpf: this.cpf,
-          phone: this.phone,
+        const response = await axios.post('http://localhost:3000/users', {
+          nome: state.name,
+          email: state.email,
+          senha: state.senha,
+          cpf: state.cpf,
+          telefone: state.telefone,
         });
 
         alert('Cadastro realizado com sucesso!');
         console.log('Resposta da API:', response.data);
-        this.$router.push('/login');
+        router.push('/login');
       } catch (error) {
         console.error('Erro ao realizar cadastro:', error);
         alert('Erro ao realizar cadastro. Por favor, tente novamente.');
       }
-    },
-  },
+    };
+
+    const applyCpfMask = (event: Event) => {
+      const input = event.target as HTMLInputElement;
+      let value = input.value.replace(/\D/g, '');
+      if (value.length > 11) value = value.slice(0, 11);
+      const cpfParts = value.match(/(\d{0,3})(\d{0,3})(\d{0,3})(\d{0,2})/);
+      if (cpfParts) {
+        input.value = !cpfParts[2] ? cpfParts[1] : `${cpfParts[1]}.${cpfParts[2]}${cpfParts[3] ? '.' + cpfParts[3] : ''}${cpfParts[4] ? '-' + cpfParts[4] : ''}`;
+        state.cpf = input.value;
+      }
+    };
+
+    const applyPhoneMask = (event: Event) => {
+      const input = event.target as HTMLInputElement;
+      let value = input.value.replace(/\D/g, '');
+      if (value.length > 11) value = value.slice(0, 11);
+      const phoneParts = value.match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
+      if (phoneParts) {
+        input.value = !phoneParts[2] ? phoneParts[1] : `(${phoneParts[1]}) ${phoneParts[2]}${phoneParts[3] ? '-' + phoneParts[3] : ''}`;
+        state.telefone = input.value;
+      }
+    };
+
+    return {
+      state,
+      registerUser,
+      validateField,
+      applyCpfMask,
+      applyPhoneMask,
+    };
+  }
 });
 </script>
 
@@ -156,5 +243,11 @@ router-link {
 
 router-link:hover {
   text-decoration: underline;
+}
+
+.error {
+  color: red;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
 }
 </style>

@@ -23,8 +23,8 @@
 import { defineComponent, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
-import CalendarView from '@/components/Calendar.vue';
-import HomeIcon from '@/components/HomeIcon.vue';
+import CalendarView from '../../components/Calendar.vue';
+import HomeIcon from '../../components/HomeIcon.vue';
 
 export default defineComponent({
   name: 'CalendarPage',
@@ -38,7 +38,7 @@ export default defineComponent({
     const showWarning = ref(false);
 
     const goToSelectTime = () => {
-      if (store.state.selectedDates.length === 0) {
+      if (store.state.selectedDate === null) {
         showWarning.value = true;
       } else {
         router.push({ name: 'SelectTime' });
@@ -107,7 +107,7 @@ h1 {
 }
 
 .next-button {
-  background: linear-gradient(to right, #ff5858, #f857a6);
+  background:  linear-gradient(to right, #4300a2, #ff5858);
   border: none;
   color: white;
   padding: 10px 20px;
@@ -123,11 +123,12 @@ h1 {
 }
 
 .next-button:hover {
-  background: linear-gradient(to right, #f857a6, #ff5858);
+  background:  linear-gradient(to left, #4300a2, #ff5858);
 }
 
 .warning {
   color: red;
   margin-top: 10px;
+  font-weight: bold;
 }
 </style>

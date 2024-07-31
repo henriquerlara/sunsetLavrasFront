@@ -9,7 +9,7 @@
         <div class="menu-item"><a href="#">Sobre</a></div>
         <div class="menu-item"><a href="#">Serviços</a></div>
         <div class="menu-item"><a href="#">Agendamento online</a></div>
-        <div class="menu-item"><a href="#">Planos e preços</a></div>
+        <div class="menu-item"><a href="/planosView">Planos e preços</a></div>
       </nav>
       <div class="login" v-if="user">
         <a href="/account" class="login-link">
@@ -51,7 +51,7 @@ export default defineComponent({
 
     const checkUser = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/account', { withCredentials: true });
+        const response = await axios.get('http://localhost:3000/account', { withCredentials: true });
         if (response.data && response.data.user) {
           user.value = response.data.user;
         }

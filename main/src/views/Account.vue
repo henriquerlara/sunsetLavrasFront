@@ -1,29 +1,64 @@
 <template>
   <div class="account">
-    <HomeIcon/>
+    <HomeIcon />
     <div class="container">
       <div class="header">
         <h2>Minha Conta</h2>
+        <font-awesome-icon
+          :icon="isEditing ? 'times' : 'edit'"
+          class="edit-icon"
+          @click="toggleEdit"
+          :class="{ active: isEditing }"
+        />
       </div>
       <div v-if="loading">
         <div class="loader"></div>
         <p>Carregando dados do usuário...</p>
       </div>
       <div v-else-if="user">
+        <div class="help-text">
+          Clique no ícone <strong>{{ isEditing ? "X" : "editar" }}</strong> no canto superior direito para 
+          {{ isEditing ? "sair do modo de edição" : "entrar no modo de edição" }}.
+        </div>
         <div class="user-info">
-          <p><strong>Nome:</strong> <input v-model="user.nome" /></p>
-          <p><strong>Email:</strong> <input v-model="user.email" /></p>
-          <p><strong>Senha:</strong> <input v-model="user.senha" /></p>
+          <p>
+            <strong>Nome:</strong>
+            <input :readonly="!isEditing" v-model="user.nome" />
+            <span class="error" v-if="errors.nome">{{ errors.nome }}</span>
+          </p>
+          <p>
+            <strong>Email:</strong>
+            <input :readonly="!isEditing" v-model="user.email" />
+            <span class="error" v-if="errors.email">{{ errors.email }}</span>
+          </p>
+          <p>
+            <strong>CPF:</strong>
+            <input :readonly="!isEditing" v-model="user.cpf" @input="applyCpfMask" />
+            <span class="error" v-if="errors.cpf">{{ errors.cpf }}</span>
+          </p>
+          <p>
+            <strong>Telefone:</strong>
+            <input :readonly="!isEditing" v-model="user.telefone" @input="applyPhoneMask" />
+            <span class="error" v-if="errors.telefone">{{ errors.telefone }}</span>
+          </p>
         </div>
         <div class="button-group">
-          <button @click="updateUser" class="update-button">Atualizar</button>
-          <button @click="logout" class="logout-button">Logout</button>
+          <button v-if="isEditing" @click="saveUser" class="save-button" :disabled="saving">
+            <span v-if="saving">Salvando...</span>
+            <span v-else>Salvar</span>
+          </button>
+          <button v-else @click="logout" class="logout-button">Logout</button>
         </div>
-        <button @click="toggleHorarios" class="horarios-button">
-          {{ showHorarios ? 'Ocultar Horários' : 'Meus Horários' }}
-        </button>
+        <div class="extra-buttons" v-if="!isEditing">
+          <button @click="toggleHorarios" class="horarios-button">
+            {{ showHorarios ? "Ocultar Horários" : "Meus Horários" }}
+          </button>
+          <button @click="togglePlanos" class="planos-button">
+            {{ showPlanos ? "Ocultar Planos" : "Meus Planos" }}
+          </button>
+        </div>
         <transition name="slide-fade">
-          <div v-show="showHorarios" class="horarios-section">
+          <div v-show="showHorarios && !isEditing" class="horarios-section">
             <h3>MEUS HORÁRIOS</h3>
             <div v-if="loadingHorarios">
               <div class="loader"></div>
@@ -31,7 +66,11 @@
             </div>
             <div v-else>
               <div v-if="horarios.length > 0">
-                <div v-for="horario in horarios" :key="horario.id" class="horario">
+                <div
+                  v-for="horario in horarios"
+                  :key="horario.id"
+                  class="horario"
+                >
                   <p><strong>Data:</strong> {{ formatDate(horario.data) }}</p>
                   <p><strong>Hora:</strong> {{ horario.horario }}</p>
                   <p><strong>Quadra:</strong> {{ horario.quadra.nome }}</p>
@@ -43,22 +82,46 @@
             </div>
           </div>
         </transition>
+        <transition name="slide-fade">
+          <div v-show="showPlanos && !isEditing" class="planos-section">
+            <h3>MEUS PLANOS</h3>
+            <div v-if="loadingPlanos">
+              <div class="loader"></div>
+              <p>Carregando planos...</p>
+            </div>
+            <div v-else>
+              <div v-if="planos.length > 0">
+                <div v-for="plano in planos" :key="plano.id" class="plano">
+                  <p><strong>Plano:</strong> {{ plano.nome }}</p>
+                  <p><strong>Início:</strong> {{ formatDate(plano.inicio) }}</p>
+                  <p><strong>Fim:</strong> {{ formatDate(plano.fim) }}</p>
+                </div>
+              </div>
+              <div v-else>
+                <p>Não há planos ativos.</p>
+              </div>
+            </div>
+          </div>
+        </transition>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue';
-import axios from 'axios';
-import HomeIcon from '../components/HomeIcon.vue';
-import dayjs from 'dayjs';
+import { defineComponent, ref, onMounted } from "vue";
+import axios from "axios";
+import HomeIcon from "../components/HomeIcon.vue";
+import dayjs from "dayjs";
+import * as yup from "yup";
+import { validateCPF } from "../services/validateCPF";
 
 interface User {
   id: number;
   nome: string;
   email: string;
-  senha: string;
+  cpf: string;
+  telefone: string;
 }
 
 interface Horario {
@@ -70,44 +133,117 @@ interface Horario {
   };
 }
 
+interface Plano {
+  id: number;
+  nome: string;
+  inicio: string;
+  fim: string;
+}
+
 export default defineComponent({
-  name: 'Account',
+  name: "Account",
   components: {
-    HomeIcon
+    HomeIcon,
   },
   setup() {
     const user = ref<User | null>(null);
     const horarios = ref<Horario[]>([]);
+    const planos = ref<Plano[]>([]);
     const showHorarios = ref(false);
+    const showPlanos = ref(false);
     const loading = ref(true);
-    const loadingHorarios = ref(false);
+    const loadingHorarios = ref(true);
+    const loadingPlanos = ref(true);
+    const isEditing = ref(false);
+    const saving = ref(false);
+    const errors = ref<Record<string, string>>({});
+
+    const schema = yup.object().shape({
+      nome: yup
+        .string()
+        .min(2, "O nome deve ter pelo menos 2 caracteres")
+        .required("Nome é obrigatório"),
+      email: yup
+        .string()
+        .email("Email inválido")
+        .required("Email é obrigatório"),
+      cpf: yup
+        .string()
+        .required('CPF é obrigatório')
+        .test('is-valid-cpf', 'CPF inválido', (value) => {
+          const cleanCpf = value?.replace(/\D/g, '');
+          if (!cleanCpf || cleanCpf.length < 11) {
+            return false; // Se o CPF não tiver 11 dígitos, é considerado inválido
+          }
+          return validateCPF(cleanCpf);
+        }),
+      telefone: yup
+        .string()
+        .matches(
+          /^\(\d{2}\) \d{4,5}-\d{4}$/,
+          "O telefone deve estar no formato (XX) XXXXX-XXXX"
+        )
+        .required("Telefone é obrigatório"),
+    });
 
     const fetchUserData = async () => {
-        try {
-          const response = await axios.get('http://localhost:3000/account', { withCredentials: true });
-          if (response.data && response.data.user) {
-            user.value = response.data.user;
-          }
-        } catch (error) {
-          console.error('Erro ao obter dados do usuário:', error);
-        } finally {
-          loading.value = false;
+      try {
+        const response = await axios.get("http://localhost:3000/account", {
+          withCredentials: true,
+        });
+        if (response.data && response.data.user) {
+          user.value = response.data.user;
         }
+      } catch (error) {
+        console.error("Erro ao obter dados do usuário:", error);
+      } finally {
+        loading.value = false;
+      }
     };
 
     const fetchHorarios = async () => {
-      loadingHorarios.value = true;
+  loadingHorarios.value = true;
+  try {
+    if (user.value) {
+      const response = await axios.get(
+        `http://localhost:3000/horariosOcupados/${user.value.id}`,
+        { withCredentials: true }
+      );
+      const allHorarios = response.data || [];
+      const startOfToday = dayjs().startOf("day");
+      
+      // Ordenando os horários por data e hora
+      horarios.value = allHorarios
+        .filter(
+          (horario: Horario) =>
+            dayjs(horario.data).isAfter(startOfToday) ||
+            dayjs(horario.data).isSame(startOfToday)
+        )
+        .sort((a: Horario, b: Horario) => {
+          const dateA = dayjs(`${a.data} ${a.horario}`);
+          const dateB = dayjs(`${b.data} ${b.horario}`);
+          return dateA.isBefore(dateB) ? -1 : 1;
+        });
+    }
+  } catch (error) {
+    console.error("Erro ao obter reservas do usuário:", error);
+  } finally {
+    loadingHorarios.value = false;
+  }
+};
+
+    const fetchPlanos = async () => {
       try {
         if (user.value) {
-          const response = await axios.get(`http://localhost:3000/horariosOcupados/${user.value.id}`, { withCredentials: true });
-          const allHorarios = response.data || [];
-          const startOfToday = dayjs().startOf('day');
-          horarios.value = allHorarios.filter((horario: Horario) => dayjs(horario.data).isAfter(startOfToday) || dayjs(horario.data).isSame(startOfToday));
+          const response = await axios.get(
+            `http://localhost:3000/reservas/${user.value.id}`,
+            { withCredentials: true }
+          );
+          planos.value = response.data || [];
+          loadingPlanos.value = false
         }
       } catch (error) {
-        console.error('Erro ao obter reservas do usuário:', error);
-      } finally {
-        loadingHorarios.value = false;
+        console.error("Erro ao obter planos do usuário:", error);
       }
     };
 
@@ -118,27 +254,87 @@ export default defineComponent({
       showHorarios.value = !showHorarios.value;
     };
 
-    const updateUser = async () => {
+    const togglePlanos = () => {
+      if (!showPlanos.value) {
+        fetchPlanos();
+      }
+      showPlanos.value = !showPlanos.value;
+    };
+
+    const toggleEdit = () => {
+      isEditing.value = !isEditing.value;
+      if (!isEditing.value) {
+        errors.value = {};
+      } else {
+        // Esconde os horários e planos quando entra em modo de edição
+        showHorarios.value = false;
+        showPlanos.value = false;
+      }
+    };
+
+    const saveUser = async () => {
+      errors.value = {};
       try {
-        await axios.put('http://localhost:3000/account', user.value, { withCredentials: true });
-        alert('Dados atualizados com sucesso!');
-      } catch (error) {
-        console.error('Erro ao atualizar dados do usuário:', error);
+        await schema.validate(user.value, { abortEarly: false });
+        saving.value = true;
+        await axios.put("http://localhost:3000/account", user.value, {
+          withCredentials: true,
+        });
+        alert("Dados atualizados com sucesso!");
+        isEditing.value = false; // Sai do modo de edição
+      } catch (validationError) {
+        if (validationError instanceof yup.ValidationError) {
+          validationError.inner.forEach((err) => {
+            if (err.path) {
+              errors.value[err.path] = err.message;
+            }
+          });
+        } else {
+          console.error("Erro ao atualizar dados do usuário:", validationError);
+        }
+      } finally {
+        saving.value = false;
+      }
+    };
+
+    const applyCpfMask = (event: Event) => {
+      const input = event.target as HTMLInputElement;
+      let value = input.value.replace(/\D/g, '');
+      if (value.length > 11) value = value.slice(0, 11);
+      const cpfParts = value.match(/(\d{0,3})(\d{0,3})(\d{0,3})(\d{0,2})/);
+      if (cpfParts) {
+        input.value = !cpfParts[2] ? cpfParts[1] : `${cpfParts[1]}.${cpfParts[2]}${cpfParts[3] ? '.' + cpfParts[3] : ''}${cpfParts[4] ? '-' + cpfParts[4] : ''}`;
+        if (user.value) user.value.cpf = input.value;
+      }
+    };
+
+    const applyPhoneMask = (event: Event) => {
+      const input = event.target as HTMLInputElement;
+      let value = input.value.replace(/\D/g, '');
+      if (value.length > 11) value = value.slice(0, 11);
+      const phoneParts = value.match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
+      if (phoneParts) {
+        input.value = !phoneParts[2] ? phoneParts[1] : `(${phoneParts[1]}) ${phoneParts[2]}${phoneParts[3] ? '-' + phoneParts[3] : ''}`;
+        if (user.value) user.value.telefone = input.value;
       }
     };
 
     const logout = async () => {
       try {
-        await axios.post('http://localhost:3000/users/logout', {}, { withCredentials: true });
+        await axios.post(
+          "http://localhost:3000/users/logout",
+          {},
+          { withCredentials: true }
+        );
         user.value = null;
-        window.location.href = '/';
+        window.location.href = "/";
       } catch (error) {
-        console.error('Erro ao fazer logout:', error);
+        console.error("Erro ao fazer logout:", error);
       }
     };
 
     const formatDate = (date: string) => {
-      return dayjs(date).format('DD/MM/YYYY');
+      return dayjs(date).format("DD/MM/YYYY");
     };
 
     onMounted(() => {
@@ -148,13 +344,23 @@ export default defineComponent({
     return {
       user,
       horarios,
+      planos,
       showHorarios,
+      showPlanos,
       toggleHorarios,
-      updateUser,
+      togglePlanos,
+      toggleEdit,
+      saveUser,
       logout,
       loading,
       loadingHorarios,
+      loadingPlanos,
       formatDate,
+      isEditing,
+      saving,
+      errors,
+      applyCpfMask,
+      applyPhoneMask,
     };
   },
 });
@@ -191,13 +397,33 @@ export default defineComponent({
   border-radius: 10px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   text-align: center;
+  position: relative;
 }
 
 .header {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   text-align: center;
+  position: relative;
+}
+
+.edit-icon {
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: #4300a2;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  transition: color 0.3s, transform 0.3s;
+}
+
+.edit-icon:hover {
+  transform: scale(1.2);
+}
+
+.edit-icon.active {
+  color: #ff5858;
 }
 
 h2 {
@@ -210,12 +436,23 @@ h2 {
   font-size: 1.2rem;
   margin: 10px 0;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column; /* Adjusted for better spacing */
+  align-items: flex-start;
+  position: relative;
+}
+
+.help-text {
+  background: #f1f1f1;
+  color: #333;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  text-align: left;
+  font-size: 0.95rem;
 }
 
 input {
-  width: calc(100% - 120px);
+  width: 100%; /* Adjusted for full-width inputs */
   padding: 10px;
   margin-top: 5px;
   font-size: 1.2rem;
@@ -224,24 +461,37 @@ input {
   box-sizing: border-box;
 }
 
+input[readonly] {
+  background-color: #f9f9f9;
+  cursor: not-allowed;
+}
+
 strong {
   color: #333;
+}
+
+.error {
+  color: red;
+  font-size: 0.875rem; /* Reduced font size for better readability */
+  margin-top: 5px; /* Added margin for better spacing */
 }
 
 .button-group {
   display: flex;
   justify-content: space-between;
+  margin-top: 20px;
 }
 
-.update-button,
+.save-button,
 .logout-button,
-.horarios-button {
+.horarios-button,
+.planos-button {
   background: linear-gradient(to right, #4300a2, #ff5858);
   border: none;
   color: white;
   padding: 10px 20px;
   font-size: 1rem;
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -252,21 +502,25 @@ strong {
   flex: 1;
 }
 
-.update-button:hover,
+.save-button[disabled] {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.save-button:hover,
 .logout-button:hover,
-.horarios-button:hover {
+.horarios-button:hover,
+.planos-button:hover {
   background: linear-gradient(to left, #4300a2, #ff5858);
 }
 
-.logout-button {
-  background: linear-gradient(to right, #4300a2, #ff5858);
+.extra-buttons {
+  display: flex;
+  justify-content: center;
 }
 
-.logout-button:hover {
-  background: linear-gradient(to left, #4300a2, #ff5858);
-}
-
-.horarios-section {
+.horarios-section,
+.planos-section {
   margin-top: 20px;
   background: linear-gradient(to right, #4300a2, #ff5858);
   padding: 20px;
@@ -279,7 +533,8 @@ strong {
   color: white;
 }
 
-.horario {
+.horario,
+.plano {
   background: white;
   padding: 10px;
   margin-bottom: 10px;
@@ -288,7 +543,8 @@ strong {
   color: black;
 }
 
-.horario p {
+.horario p,
+.plano p {
   margin: 5px 0;
 }
 
@@ -314,7 +570,11 @@ strong {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>

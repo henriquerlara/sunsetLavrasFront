@@ -28,6 +28,11 @@
           <input type="tel" id="telefone" v-model="state.telefone" @input="applyPhoneMask" @blur="validateField('telefone')" />
           <span v-if="state.errors.telefone" class="error">{{ state.errors.telefone }}</span>
         </div>
+        <div class="form-group consent">
+          <input type="checkbox" id="consent" v-model="state.consent" />
+          <label for="consent">Eu li e concordo com os <a href="/terms" target="_blank">Termos de Uso</a> e a <a href="/privacy" target="_blank">Política de Privacidade</a></label>
+          <span v-if="state.errors.consent" class="error">{{ state.errors.consent }}</span>
+        </div>
         <button type="submit">Cadastrar</button>
       </form>
       <p>Já tem uma conta? <router-link to="/login">Faça seu login</router-link></p>
@@ -40,6 +45,7 @@ import { defineComponent, reactive } from 'vue';
 import axios from 'axios';
 import * as yup from 'yup';
 import { useRouter } from 'vue-router';
+import { validateCPF } from '../services/validateCPF'; // Importe a função de validação de CPF
 
 export default defineComponent({
   name: 'Register',
@@ -52,12 +58,14 @@ export default defineComponent({
       senha: '',
       cpf: '',
       telefone: '',
+      consent: false,
       errors: {
         name: '',
         email: '',
         senha: '',
         cpf: '',
         telefone: '',
+        consent: ''
       } as Record<string, string>
     });
 
@@ -65,8 +73,18 @@ export default defineComponent({
       name: yup.string().min(2, 'O nome deve ter pelo menos 2 caracteres').required('Nome é obrigatório'),
       email: yup.string().email('Email inválido').required('Email é obrigatório'),
       senha: yup.string().min(8, 'A senha deve ter pelo menos 8 caracteres').required('Senha é obrigatória'),
-      cpf: yup.string().matches(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, 'O CPF deve estar no formato XXX.XXX.XXX-XX').required('CPF é obrigatório'),
+      cpf: yup
+        .string()
+        .required('CPF é obrigatório')
+        .test('is-valid-cpf', 'CPF inválido', (value) => {
+          const cleanCpf = value?.replace(/\D/g, '');
+          if (!cleanCpf || cleanCpf.length < 11) {
+            return false; // Se o CPF não tiver 11 dígitos, é considerado inválido
+          }
+          return validateCPF(cleanCpf);
+        }),
       telefone: yup.string().matches(/^\(\d{2}\) \d{4,5}-\d{4}$/, 'O telefone deve estar no formato (XX) XXXXX-XXXX').required('Telefone é obrigatório'),
+      consent: yup.boolean().oneOf([true], 'Você deve aceitar os Termos de Uso e a Política de Privacidade').required('Consentimento é obrigatório')
     });
 
     const validateField = async (field: string) => {
@@ -83,11 +101,11 @@ export default defineComponent({
     const validate = async () => {
       try {
         await schema.validate({ ...state }, { abortEarly: false });
-        state.errors = { name: '', email: '', senha: '', cpf: '', telefone: '' };
+        state.errors = { name: '', email: '', senha: '', cpf: '', telefone: '', consent: '' };
         return true;
       } catch (err) {
         if (err instanceof yup.ValidationError) {
-          const newErrors: Record<string, string> = { name: '', email: '', senha: '', cpf: '', telefone: '' };
+          const newErrors: Record<string, string> = { name: '', email: '', senha: '', cpf: '', telefone: '', consent: '' };
           err.inner.forEach((error) => {
             if (error.path) {
               newErrors[error.path] = error.message;
@@ -103,7 +121,7 @@ export default defineComponent({
       if (!(await validate())) {
         return;
       }
-      
+
       try {
         console.log('Registrando usuário com os dados:', {
           nome: state.name,
@@ -163,25 +181,19 @@ export default defineComponent({
 });
 </script>
 
-<style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
 
-html, body {
-  width: 100%;
-  height: 100%;
-  font-family: 'Montserrat', sans-serif;
-}
+<style scoped>
 
 .register-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
   background: linear-gradient(to right, #4300a2, #ff5858);
 }
 
 .register-box {
   background: white;
+  margin: 30px;
   padding: 60px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -190,13 +202,13 @@ html, body {
 }
 
 h1 {
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
   font-size: 28px;
   color: #f857a6;
 }
 
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.7rem;
   text-align: left;
 }
 
@@ -214,6 +226,16 @@ input {
   font-size: 1rem;
 }
 
+.consent {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.consent input {
+  margin-right: 0.5rem;
+}
+
 button {
   background-color: #f857a6;
   color: white;
@@ -224,7 +246,7 @@ button {
   cursor: pointer;
   transition: background-color 0.3s;
   width: 100%;
-  margin-top: 1.5rem;
+  margin-top: 1rem;
 }
 
 button:hover {

@@ -8,9 +8,11 @@
       </div>
       <div v-else>
         <div v-if="hasSelectedDates">
-          <h1>Selecione um horário para {{ formattedDates }}</h1>
+          <h1 class="title">Selecione os horários do seu plano</h1>
           <div class="main-content">
-            <h2>Horários disponíveis:</h2>
+            <p class="subtitle"><strong>Os dias do plano serão:</strong> {{ formattedDates }}</p>
+            <p class="subtitle"><strong>Dia da semana escolhido: </strong> {{ selectedDayName }}</p>
+            <h2 class="horariosDisponiveis"><strong>Horários disponíveis:</strong></h2>
             <div v-for="court in courts" :key="court.id" :class="{ disabled: isCourtDisabled(court.id) }" class="court">
               <h3>{{ court.nome }} - {{ court.patrocinador.nome }}</h3>
               <div class="times">
@@ -25,9 +27,18 @@
                 </button>
               </div>
             </div>
+            <div class="descriptions">
             <p class="description">
               É possível selecionar mais de um horário de uma vez, mas todos os horários devem ser para a mesma quadra.
             </p>
+            <p class="description">
+              Cada horário selecionado corresponde a marcação para os quatro dias com desconto aplicado.
+            </p>
+          </div>
+            <div class="total-price">
+              Valor total: R$ {{ totalPrice.toFixed(2) }}
+            </div>
+          
             <button
               class="next-button"
               :class="{ clicked: nextButtonClicked }"
@@ -38,10 +49,11 @@
               Próximo
             </button>
             <p v-if="showWarning" class="warning">Por favor, selecione um horário antes de prosseguir.</p>
+            <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
           </div>
         </div>
         <div v-else>
-          <WarningData :rota="rota"/>
+          <WarningData :rota="rota" />
         </div>
       </div>
     </div>
@@ -50,13 +62,13 @@
 
 <script lang="ts">
 import { defineComponent, ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import dayjs from 'dayjs';
 import axios from 'axios';
+import HomeIcon from '../../components/HomeIcon.vue';
+import WarningData from '../../components/WarningData.vue';
 import { loadStripe } from '@stripe/stripe-js';
-import HomeIcon from '../components/HomeIcon.vue';
-import WarningData from '../components/WarningData.vue';
 
 const stripePromise = loadStripe('pk_test_51PfufkRxlLJdQ9IhESSmTptbyyFlrIbQbBA8KComvvRgFSxKt9IUh9DmqkBIOOgx0rDGweY00GDohnCL1id9KfDH00Xgsu33QH');
 
@@ -80,8 +92,12 @@ export default defineComponent({
     WarningData
   },
   setup() {
-    const rota = ref<string>("calendar");
+    const BASE_PRICE_PER_HOUR = 80; // Base price per hour
+    const PRICE_DISCOUNTED_PER_HOUR = 75; // Discounted price per hour for the plan
+
     const store = useStore();
+    const router = useRouter();
+    const rota = ref("dias");
     const courts = ref<Court[]>([]);
     const availableTimes = ref<{ [courtId: number]: AvailableTime[] }>({});
     const selectedTimes = ref<{ court: number; hour: string }[]>([]);
@@ -89,9 +105,16 @@ export default defineComponent({
     const loading = ref(true);
     const nextButtonClicked = ref(false);
     const showWarning = ref(false);
+    const errorMessage = ref<string | null>(null);
+    const activePlanName = ref<string | null>('Mensal'); // Assuming 'Mensal' for the discount example
 
     const hasSelectedDates = computed(() => store.state.selectedDates && store.state.selectedDates.length > 0);
     const formattedDates = computed(() => store.state.selectedDates.map((date: string) => dayjs(date).format('DD/MM/YYYY')).join(', '));
+    const selectedDayName = computed(() => {
+      const selectedDayIndex = store.state.selectedDayIndex;
+      const daysOfWeek = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+      return daysOfWeek[selectedDayIndex]; // Ajuste de acordo com o cálculo do Vue
+    });
 
     const fetchCourts = async () => {
       try {
@@ -104,7 +127,9 @@ export default defineComponent({
 
     const fetchOccupiedTimes = async (dates: string[], courtId: number) => {
       try {
-        const response = await axios.post('http://localhost:3000/checkAvailability', { dates });
+        const response = await axios.post('http://localhost:3000/checkAvailability', {
+          dates,
+        });
         return response.data.unavailableTimes[courtId] || [];
       } catch (error) {
         console.error('Error fetching occupied times:', error);
@@ -142,11 +167,11 @@ export default defineComponent({
       const index = selectedTimes.value.findIndex(t => t.court === court && t.hour === hour);
       if (index === -1) {
         selectedTimes.value.push({ court, hour });
-        activeCourt.value = court;
+        activeCourt.value = court; // Set the active court when a time is selected
       } else {
         selectedTimes.value.splice(index, 1);
         if (selectedTimes.value.length === 0) {
-          activeCourt.value = null;
+          activeCourt.value = null; // Reset active court if no selections are made
         }
       }
     };
@@ -170,14 +195,13 @@ export default defineComponent({
 
       loading.value = true;
       const selectedHours = selectedTimes.value.map(t => t.hour);
-      const selectedCourt = selectedTimes.value.length > 0 ? selectedTimes.value[0].court : null;
+      const selectedCourts = selectedTimes.value.map(t => t.court);
 
       try {
         const response = await axios.post('http://localhost:3000/stripe/create-checkout-session', {
           dates: store.state.selectedDates,
-          hours: selectedHours,
-          court: selectedCourt,
-          total: selectedHours.length * 80,
+          entries: selectedTimes.value, // Pass court and hour pairs
+          total: totalPrice.value,
         });
 
         const sessionId = response.data.id;
@@ -204,9 +228,18 @@ export default defineComponent({
       loading.value = false; // Ensure loading is set to false if no dates are selected
     });
 
+    const totalPrice = computed(() => {
+      return selectedTimes.value.length * PRICE_DISCOUNTED_PER_HOUR * 4; // Total price for 4 occurrences
+    });
+
+    const discountApplied = computed(() => {
+      return activePlanName.value !== null;
+    });
+
     return {
       hasSelectedDates,
       formattedDates,
+      selectedDayName,
       availableTimes,
       courts,
       selectTime,
@@ -217,18 +250,16 @@ export default defineComponent({
       nextButtonClicked,
       showWarning,
       rota,
+      errorMessage,
+      totalPrice, // Add the computed property to the return object
+      discountApplied, // Add computed property for discount
+      activePlanName,
     };
   },
 });
 </script>
 
-
 <style scoped>
-html, body {
-  width: 100%;
-  height: 100%;
-  font-family: 'Montserrat', sans-serif;
-}
 
 .select-time-page {
   display: flex;
@@ -242,6 +273,7 @@ html, body {
 }
 
 .main-content {
+  border-top: 5px solid #888888;
   background: white;
   color: #333;
   width: 100%;
@@ -256,8 +288,25 @@ html, body {
   max-width: 1350px;
 }
 
+.title{
+  text-transform: uppercase;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.subtitle{
+  font-size: 20px;
+}
+
 .court {
-  margin-top: 20px;
+  margin-top: 10px;
+  padding: 15px;
+  background-color: #f7f7f7; /* Light background for courts section */
+  border-radius: 8px;
+}
+
+.horariosDisponiveis{
+  margin-top:10px;
+  margin-bottom: -10px;
 }
 
 .court.disabled {
@@ -304,8 +353,18 @@ button.selected:hover {
 }
 
 .description {
-  margin-top: 20px;
   color: #666;
+}
+
+.descriptions {
+  margin-top: 20px;
+}
+
+.total-price {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-top: 20px;
+  color: #333;
 }
 
 .next-button {
@@ -325,7 +384,7 @@ button.selected:hover {
 }
 
 .next-button.clicked {
-  background-color: #007BFF;
+  background-color: #007bff;
   color: white;
 }
 
@@ -359,6 +418,12 @@ button.selected:hover {
 }
 
 .warning {
+  color: red;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.error {
   color: red;
   font-weight: bold;
   margin-top: 10px;

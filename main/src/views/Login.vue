@@ -1,3 +1,4 @@
+<!-- src/views/Login.vue -->
 <template>
   <div class="login-container">
     <div class="login-box">
@@ -13,7 +14,12 @@
         </div>
         <button type="submit">Entrar</button>
       </form>
-      <p>Não tem uma conta? <router-link to="/register">Faça seu cadastro</router-link></p>
+      <p>
+        Não tem uma conta? <router-link to="/register">Faça seu cadastro</router-link>
+      </p>
+      <p>
+        Esqueceu a senha? <router-link to="/forgot-password">Redefinir senha</router-link>
+      </p>
     </div>
   </div>
 </template>
@@ -36,12 +42,12 @@ export default defineComponent({
       try {
         const response = await axios.post('http://localhost:3000/login', {
           email: email.value,
-          senha: senha.value
+          senha: senha.value,
         }, { withCredentials: true });
 
         if (response.data.success) {
           store.commit('setAuthentication', true);
-          router.push('/'); // Use o router aqui
+          router.push('/');
         } else {
           alert('Login falhou. Por favor, verifique suas credenciais.');
         }
@@ -56,7 +62,7 @@ export default defineComponent({
       email,
       senha,
     };
-  }
+  },
 });
 </script>
 

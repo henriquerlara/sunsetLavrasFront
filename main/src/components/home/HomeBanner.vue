@@ -36,6 +36,10 @@ export default defineComponent({
   width: 100%;
   height: 80vh;
   background: url('@/assets/quadras.jpg') no-repeat center center/cover;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .overlay {
@@ -44,8 +48,9 @@ export default defineComponent({
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5); /* Overlay escuro */
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 }
@@ -56,7 +61,8 @@ export default defineComponent({
   text-align: center;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  width: 60%;
+  max-width: 600px;
+  width: 90%;
 }
 
 h1 {
@@ -92,4 +98,35 @@ button {
 button:hover {
   background-color: #ff5858;
 }
+
+/* Estilos responsivos para HomeBanner */
+@media (max-width: 768px) {
+  .home-banner {
+    height: auto;
+  }
+
+  .overlay {
+    position: static;
+    background: none;
+    padding: 5rem 0;
+  }
+
+  .content {
+    width: 90%;
+  }
+
+  h1 {
+    font-size: 32px;
+  }
+
+  p {
+    font-size: 16px;
+  }
+
+  button {
+    padding: 12px 24px;
+    font-size: 14px;
+  }
+}
+
 </style>

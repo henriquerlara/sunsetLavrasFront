@@ -1,5 +1,5 @@
 <template>
-  <div class="Welcome-banner">
+  <div class="banner">
     <div class="content">
       <h1>CONHEÇA A SUNSET ARENA LAVRAS</h1>
       <p>Localizado no centro de Lavras, Minas Gerais, a Sunset Arena conta com 5 quadras de areia para esportes de praia. Agende uma aula ou garanta seu aluguel online e prepare-se para a diversão!</p>
@@ -13,6 +13,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import '@/assets/homeBanners.css';
 
 export default defineComponent({
   name: 'WelcomeBanner'
@@ -20,18 +21,19 @@ export default defineComponent({
 </script>
 
 <style scoped>
-
-.Welcome-banner {
+.banner {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 2rem;
-  background-color: #f8f8f8; /* Cor de fundo leve */
+  background-color: #f8f8f8;
+  flex-wrap: wrap;
 }
 
 .content {
   flex: 1;
-  padding-right: 2rem;
+  padding: 2rem;
+  text-align: center;
 }
 
 h1 {
@@ -70,14 +72,15 @@ button:hover {
 
 .image {
   flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  width: 100%;
+  height: 250px;
+  overflow: hidden;
 }
 
 .image img {
-  max-width: 100%;
-  height: auto;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   border-radius: 10px;
 }
 </style>

@@ -4,7 +4,7 @@
     <h1>Escolha o dia da semana para o seu plano</h1>
     <div class="container">
       <select v-model="selectedDay" class="dropdown">
-        <option disabled value="">Selecione um dia</option>
+        <option disabled value="-1">Selecione um dia</option>
         <option v-for="(day, index) in daysOfWeek" :key="index" :value="index">
           {{ day }}
         </option>
@@ -18,7 +18,7 @@
 import { defineComponent, ref } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import HomeIcon from '../components/HomeIcon.vue';
+import HomeIcon from '../../components/HomeIcon.vue';
 import dayjs from 'dayjs';
 
 export default defineComponent({
@@ -30,30 +30,39 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
     const daysOfWeek = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
-    const selectedDay = ref<number | null>(null);
+    const selectedDay = ref<number | null>(-1);
+    const index = ref<number | null>(null);
 
     const getNextOccurrences = (dayIndex: number): Date[] => {
       const today = dayjs().startOf('day');
       const currentDayOfWeek = today.day();
       const occurrences = [];
 
-      for (let i = 1; i <= 4; i++) {
-        let nextOccurrence = today.day(dayIndex);
-        if (dayIndex <= currentDayOfWeek) {
-          nextOccurrence = nextOccurrence.add(i, 'week');
-        } else {
-          nextOccurrence = nextOccurrence.add(i - 1, 'week');
-        }
+      // Ajuste do dayIndex para corresponder ao formato de dayjs
+      dayIndex = (dayIndex + 1) % 7;
+      index.value = dayIndex;
+
+      let nextOccurrence = today.day(dayIndex);
+
+      // Se o próximo dia calculado estiver no passado ou for o mesmo dia de hoje, adicione uma semana
+      if (nextOccurrence.isBefore(today) || nextOccurrence.isSame(today)) {
+        nextOccurrence = nextOccurrence.add(1, 'week');
+      }
+
+      // Adiciona as próximas 4 ocorrências ao array
+      for (let i = 0; i < 4; i++) {
         occurrences.push(nextOccurrence.toDate());
+        nextOccurrence = nextOccurrence.add(1, 'week');
       }
 
       return occurrences;
     };
 
     const goToSelectTime = () => {
-      if (selectedDay.value !== null) {
+      if (selectedDay.value !== null && selectedDay.value !== -1) {
         const nextOccurrences = getNextOccurrences(selectedDay.value);
         store.commit('setSelectedDates', nextOccurrences);
+        store.commit('setSelectedDayIndex', index);
         router.push({ name: 'SelectTimeMensal' });
       } else {
         alert('Por favor, selecione um dia da semana.');
@@ -83,6 +92,7 @@ export default defineComponent({
 }
 
 .container {
+  border-top: 5px solid #888888;
   background: white;
   color: #333;
   padding: 40px 30px;

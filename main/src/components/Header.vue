@@ -2,7 +2,7 @@
   <header class="sunset-header">
     <div class="container">
       <div class="logo">
-        <h1>Sunset Lavras</h1>
+        <h1>Sunset Arena</h1>
       </div>
       <nav :class="['navigation', { open: isMenuOpen }]">
         <div class="menu-item"><a href="/">Página inicial</a></div>
@@ -74,13 +74,13 @@ export default defineComponent({
 </script>
 
 <style scoped>
-
 .sunset-header {
   width: 100%;
-  background: linear-gradient(to right, #4300a2, #ff5858);
+  background: linear-gradient(to left, #EE0979, #FF6A00);
   color: white;
   padding: 40px;
   margin: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .container {
@@ -88,7 +88,7 @@ export default defineComponent({
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1100px;
   margin: 0 auto;
   padding: 0 1rem;
 }
@@ -99,10 +99,10 @@ export default defineComponent({
 
 .logo h1 {
   margin: 0;
-  font-size: 2.5rem; 
+  font-size: 2rem;
   font-weight: 700;
   letter-spacing: 2px;
-  text-transform: uppercase; 
+  text-transform: uppercase;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
 }
 
@@ -124,9 +124,9 @@ export default defineComponent({
   font-size: 1rem;
   padding: 0.5rem 1rem;
   transition: background-color 0.3s, color 0.3s;
-  font-weight: 700; 
-  letter-spacing: 1px; 
-  text-transform: uppercase; 
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 .menu-item a:hover {
@@ -148,9 +148,9 @@ export default defineComponent({
   font-size: 1rem;
   transition: background-color 0.3s, color 0.3s;
   padding: 0.5rem 1rem;
-  font-weight: 700; 
-  letter-spacing: 1px; 
-  text-transform: uppercase; 
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 .login-link:hover {
@@ -177,17 +177,19 @@ export default defineComponent({
   }
 
   .logo {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
   }
 
   .navigation {
     flex-direction: column;
     align-items: flex-start;
     display: none; /* Esconder o menu inicialmente */
+    width: 100%;
   }
 
   .navigation.open {
     display: flex; /* Mostrar o menu quando aberto */
+    width: 100%;
   }
 
   .menu-item {
@@ -201,7 +203,7 @@ export default defineComponent({
   }
 
   .login {
-    margin-top: 20px;
+    margin-top: 10px;
   }
 
   .menu-toggle {
@@ -211,7 +213,7 @@ export default defineComponent({
 
 @media (max-width: 480px) {
   .logo h1 {
-    font-size: 2rem;
+    font-size: 1.5rem;
   }
 
   .menu-item a {
@@ -225,5 +227,10 @@ export default defineComponent({
   .login-icon {
     font-size: 20px;
   }
+
+  .container {
+    padding: 0 0.5rem;
+  }
 }
+
 </style>

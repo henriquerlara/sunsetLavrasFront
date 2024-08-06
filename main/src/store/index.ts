@@ -7,6 +7,7 @@ export default createStore({
     selectedDate: null as Date | null,
     selectedWeekDay: '' as string,
     selectedDates: [] as Date[],
+    selectedDayIndex: null as number | null,
     isAuthenticated: false, // Estado para gerenciar a autenticação
     usuario: null as any, // Adicionando o estado de usuário
   },
@@ -22,6 +23,9 @@ export default createStore({
     },
     setAuthentication(state, status: boolean) {
       state.isAuthenticated = status;
+    },
+    setSelectedDayIndex(state, number: number) {
+      state.selectedDayIndex = number;
     },
     setUsuario(state, usuario: any) { // Adicionando a mutação de usuário
       console.log('Setting usuario:', usuario); // Log para depuração

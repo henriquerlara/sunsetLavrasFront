@@ -1,5 +1,5 @@
 <template>
-    <div class="planos-banner">
+    <div class="banner">
       <div class="image">
         <img src="@/assets/quadras.jpg" alt="Planos Sunset Arena Lavras" />
       </div>
@@ -15,6 +15,7 @@
   
   <script lang="ts">
   import { defineComponent } from 'vue';
+  import '@/assets/homeBanners.css';
   
   export default defineComponent({
     name: 'PlanosBanner'
@@ -22,61 +23,63 @@
   </script>
   
   <style scoped>
-  
-  .planos-banner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 2rem;
-    background: linear-gradient(to right, #4300a2, #ff5858);
-  }
-  
-  .content {
-    flex: 1;
-    padding-left: 2rem;
-  }
-  
-  h1 {
-    font-size: 36px;
-    color: #ffffff;
-    margin-bottom: 1rem;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-  
-  p {
-    font-size: 18px;
-    color: #ffffff;
-    margin-bottom: 2rem;
-    font-weight: 400;
-  }
-  
-  button {
-    background-color: white;
-    color: #f857a6;
-    border: none;
-    padding: 16px 32px;
-    font-size: 16px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    font-weight: bold;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-  
-  .image {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .image img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 10px;
-  }
+.banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2rem;
+  background: linear-gradient(to right, #4300a2, #ff5858);
+  flex-wrap: wrap;
+}
+
+.content {
+  flex: 1;
+  padding: 2rem;
+  text-align: center;
+}
+
+h1 {
+  font-size: 36px;
+  color: #ffffff;
+  margin-bottom: 1rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+p {
+  font-size: 18px;
+  color: #ffffff;
+  margin-bottom: 2rem;
+  font-weight: 400;
+}
+
+button {
+  background-color: white;
+  color: #f857a6;
+  border: none;
+  padding: 16px 32px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.image {
+  flex: 1;
+  width: 100%;
+  height: 250px;
+  overflow: hidden;
+}
+
+.image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+}
   </style>
   

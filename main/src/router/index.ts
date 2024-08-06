@@ -11,9 +11,13 @@ import CancelPage from '../views/CancelPage.vue';
 import PlanosDescricaoPage from '@/views/PlanosDescricaoPage.vue';
 import store from '../store'; // Importe o Vuex store
 import axios from 'axios';
-import SelectDayPage from '@/views/SelectDayPage.vue';
-import SelectTimeMensalPage from '@/views/SelectTimeMensalPage.vue';
+import SelectDayPage from '../views/mensal/SelectDayPage.vue';
+import SelectTimeMensalPage from '../views/mensal/SelectTimeMensalPage.vue';
 import SuccessPage from '@/views/SuccessPage.vue';
+import PrivacyPolicy from '@/views/Privacy.vue'
+import TermsOfService from '@/views/Terms.vue'
+import ResetPassword from '@/views/ResetPassword.vue';
+import ForgotPassword from '@/views/ForgotPassword.vue';
 
 const routes = [
   {
@@ -84,7 +88,27 @@ const routes = [
     path: '/success',
     name: 'SuccessPage',
     component: SuccessPage,
-  }
+  },
+  {
+    path: '/terms',
+    name: 'TermsOfService',
+    component: TermsOfService,
+  },
+  {
+    path: '/reset-password',
+    name: 'ResetPassword',
+    component: ResetPassword,
+  },
+  {
+    path: '/forgot-password',
+    name: 'ForgotPassword',
+    component: ForgotPassword,
+  },
+  {
+  path: '/privacy',
+  name: 'PrivacyPolicy',
+  component: PrivacyPolicy,
+},
 ];
 
 const router = createRouter({

@@ -1,8 +1,7 @@
-<!-- src/views/CalendarPage.vue -->
 <template>
   <div class="container">
     <HomeIcon />
-    <h1>ESCOLHA UM HORÁRIO</h1>
+    <h1>ESCOLHA UM DIA</h1>
     <div class="main">
       <CalendarView />
       <div class="legend">
@@ -13,6 +12,11 @@
           <span class="dot blue"></span> <span>Selecionado pelo usuário</span>
         </div>
       </div>
+      <div class="paragrafo">
+      <p class="description">
+        Para reservas avulsas, você só pode selecionar um dia por vez. Se deseja agendar em outros dias, finalize sua compra atual e volte a esta página para realizar outra reserva.
+            </p>
+          </div>
       <button class="next-button" @click="goToSelectTime">Próximo</button>
       <p v-if="showWarning" class="warning">Por favor, selecione uma data primeiro.</p>
     </div>
@@ -64,7 +68,23 @@ export default defineComponent({
   position: relative;
 }
 
+.description {
+  text-align: center;
+  margin-top: 20px;
+  color: #666;
+}
+
+.paragrafo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  max-width: 80%;
+  margin: 0 auto;
+}
+
 .main {
+  border-top: 5px solid #cd7f32; /* Bronze */
   width: 100%;
   max-width: 1200px;
   padding: 20px;
